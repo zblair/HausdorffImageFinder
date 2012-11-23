@@ -1,6 +1,6 @@
 /**
  * @file hausdorff.h Provides algorithms for calculating the Hausdorff distance.
- */ 
+ */
 
 #ifndef HAUSDORFF_H
 #define HAUSDORFF_H
@@ -26,7 +26,7 @@ double findHausdorffDistance(
     const int width = imageA.width();
     const int height = imageA.height();
     double maxDistance = std::numeric_limits<double>::min();
-	unsigned long pointsConsidered = 0;
+    unsigned long pointsConsidered = 0;
 
     for (int iy = 0; iy < height; ++iy)
     {
@@ -41,11 +41,11 @@ double findHausdorffDistance(
             // Only consider edge (black) pixels in the shape prior
             if (imageARow[ix] != 0)
                 continue;
-            
+
             const int x = ix + imageAOffset.x;
             if (x < 0 || x > imageB.width())
                 continue;
-			++ pointsConsidered;
+            ++ pointsConsidered;
             double minDistance = imageBRow[x];
             if (minDistance > maxDistance)
             {
@@ -54,7 +54,7 @@ double findHausdorffDistance(
         }
     }
 
-	return (pointsConsidered == 0) ? MAX_HAUSDORFF_DISTANCE : maxDistance;
+    return (pointsConsidered == 0) ? MAX_HAUSDORFF_DISTANCE : maxDistance;
 }
 
 #endif

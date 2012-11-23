@@ -1,6 +1,6 @@
 /**
  * @file image.h Provides an image class to be used to load, manipulate, and store images.
- */ 
+ */
 
 #ifndef IMAGE_H
 #define IMAGE_H
@@ -19,8 +19,8 @@ typedef float Intensity32F;
 #include "rgb.h"
 
 /**
-* Represents an image. 
-* The Image class provides a simple interface for reading in and 
+* Represents an image.
+* The Image class provides a simple interface for reading in and
 * saving image files, as well as accessing individual pixel values
 * and performing various algorithms on images.
 *
@@ -53,11 +53,17 @@ public:
     operator IplImage* ();
 
     // An image with no underlying image data is false
-    operator bool() { return imageData.data() != 0; }
+    operator bool() {
+        return imageData.data() != 0;
+    }
 
     // Image dimensions
-    int width() const { return imageData.width(); }
-    int height() const { return imageData.height(); }
+    int width() const {
+        return imageData.width();
+    }
+    int height() const {
+        return imageData.height();
+    }
 
     // Checked access to a pixel value by coordinate
     inline T & at(unsigned x, unsigned y);
@@ -76,21 +82,21 @@ private:
 };
 
 template <>
-Image<Rgb>::Image(unsigned width, unsigned height) 
-: imageData(cvSize(width, height), IPL_DEPTH_8U, 3)
+Image<Rgb>::Image(unsigned width, unsigned height)
+    : imageData(cvSize(width, height), IPL_DEPTH_8U, 3)
 {}
 
 template <>
-Image<Intensity>::Image(unsigned width, unsigned height) 
-: imageData(cvSize(width, height), IPL_DEPTH_8U, 1)
+Image<Intensity>::Image(unsigned width, unsigned height)
+    : imageData(cvSize(width, height), IPL_DEPTH_8U, 1)
 {}
 
 template <>
-Image<Intensity32F>::Image(unsigned width, unsigned height) 
-: imageData(cvSize(width, height), IPL_DEPTH_32F, 1)
+Image<Intensity32F>::Image(unsigned width, unsigned height)
+    : imageData(cvSize(width, height), IPL_DEPTH_32F, 1)
 {}
 
-/**   
+/**
 * Constructs an Image<Intensity> image from the specified image file,
 * converting the image to 8-bit grayscale if it is colour to begin with.
 * Supports the following file types and extensions:
@@ -101,11 +107,11 @@ Image<Intensity32F>::Image(unsigned width, unsigned height)
 *   - Sun rasters - SR, RAS
 *   - TIFF files - TIFF, TIF
 *
-* @param filename the filename of the file to read  
-*/ 
+* @param filename the filename of the file to read
+*/
 template <>
-Image<Intensity>::Image(std::string filename) 
-: imageData(filename.c_str(), 0, CV_LOAD_IMAGE_GRAYSCALE)
+Image<Intensity>::Image(std::string filename)
+    : imageData(filename.c_str(), 0, CV_LOAD_IMAGE_GRAYSCALE)
 {
     // Check if the image has been loaded properly
     if( !imageData.data() ) {
@@ -113,14 +119,14 @@ Image<Intensity>::Image(std::string filename)
     }
 }
 
-/**   
-* Constructs an Image<Rgb> image from the specified image file. 
+/**
+* Constructs an Image<Rgb> image from the specified image file.
 *
-* @param filename the filename of the file to read  
-*/ 
+* @param filename the filename of the file to read
+*/
 template <>
-Image<Rgb>::Image(std::string filename) 
-: imageData(filename.c_str(), 0, CV_LOAD_IMAGE_COLOR)
+Image<Rgb>::Image(std::string filename)
+    : imageData(filename.c_str(), 0, CV_LOAD_IMAGE_COLOR)
 {
     // Check if the image has been loaded properly
     if( !imageData.data() ) {
@@ -128,22 +134,22 @@ Image<Rgb>::Image(std::string filename)
     }
 }
 
-/** Copy and conversion constructors */ 
-template <> 
-Image<Intensity>::Image(const Image<Intensity> & im) 
-: imageData(im.imageData) {}
+/** Copy and conversion constructors */
+template <>
+Image<Intensity>::Image(const Image<Intensity> & im)
+    : imageData(im.imageData) {}
 
-template <> 
-Image<Intensity32F>::Image(const Image<Intensity32F> & im) 
-: imageData(im.imageData) {}
+template <>
+Image<Intensity32F>::Image(const Image<Intensity32F> & im)
+    : imageData(im.imageData) {}
 
-template <> 
-Image<Rgb>::Image(const Image<Rgb> & im) 
-: imageData(im.imageData) {}
+template <>
+Image<Rgb>::Image(const Image<Rgb> & im)
+    : imageData(im.imageData) {}
 
 template <>
 Image<Intensity>::Image(const Image<Rgb> & im)
-: imageData(cvSize(im.width(), im.height()), IPL_DEPTH_8U, 1)
+    : imageData(cvSize(im.width(), im.height()), IPL_DEPTH_8U, 1)
 {
     Image<Rgb> * src = const_cast<Image<Rgb> *>(&im);
     cvCvtColor(*src, *this, CV_BGR2GRAY);
@@ -151,7 +157,7 @@ Image<Intensity>::Image(const Image<Rgb> & im)
 
 template <>
 Image<Rgb>::Image(const Image<Intensity> & im)
-: imageData(cvSize(im.width(), im.height()), IPL_DEPTH_8U, 3)
+    : imageData(cvSize(im.width(), im.height()), IPL_DEPTH_8U, 3)
 {
     Image<Intensity> * src = const_cast<Image<Intensity> *>(&im);
     cvCvtColor(*src, *this, CV_GRAY2BGR);
@@ -159,43 +165,43 @@ Image<Rgb>::Image(const Image<Intensity> & im)
 
 template <typename T>
 Image<T>::Image(IplImage * iplImg)
-: imageData(iplImg)
+    : imageData(iplImg)
 {}
 
 template <typename T>
-Image<T>& Image<T>::operator= (const Image<T>& rhs) 
+Image<T>& Image<T>::operator= (const Image<T>& rhs)
 {
-    if (this != &rhs) {  
+    if (this != &rhs) {
 
         // This should actually be a cheap operation, because
         // CvImage objects appear to keep the image data in a reference
         // counted structure, so a deep copy is not performed.
         imageData = rhs.imageData;
     }
- 
+
     return *this;
 }
 
 /**
  * Conversion to IplImage so we can use Image objects with OpenCv
- * algorithms. 
- * 
+ * algorithms.
+ *
  * Example
  * @code
  *   Image<Rgb> inputImg("lena.jpg");
  *   Image<Rgb> destImg(inputImg.width(), inputImg.height());
- *   
+ *
  *   // Create a blurred image using OpenCV's "cvSmooth()" function
  *   cvSmooth( inputImg, destImg, CV_GAUSSIAN, 31, 31);
  * @endcode
  */
 template <typename T>
-Image<T>::operator IplImage* () 
-{ 
-    return static_cast<IplImage*>(imageData); 
+Image<T>::operator IplImage* ()
+{
+    return static_cast<IplImage*>(imageData);
 }
 
-/** 
+/**
 * Access to a pixel value by coordinate.
 * Because it returns a reference to the pixel value,
 * this method can be used as an lvalue for changing
@@ -215,18 +221,18 @@ template <typename T>
 inline T & Image<T>::at(unsigned x, unsigned y)
 {
     if (0 <= x && x < width() &&
-        0 <= y && y < height()) {
+            0 <= y && y < height()) {
         return (*this)[y][x];
     }
 
     throw std::out_of_range("Image coordinates out-of-range");
 }
 
-/** 
+/**
 * Gets a pointer to a row by y-coordinate. Acquiring a row
 * at a time and then accessing each pixel in the row is the
 * fastest way to iterate through all the pixels in an image.
-* 
+*
 * Example:
 * @code
 *    for (unsigned y = 0; y < img.height(); y++) {
@@ -243,16 +249,16 @@ inline T & Image<T>::at(unsigned x, unsigned y)
 */
 template <typename T>
 inline T* Image<T>::operator[](unsigned y)
-{ 
+{
     return reinterpret_cast<T*>(imageData.data() + y * imageData.step());
 }
 template <typename T>
 inline const T* Image<T>::operator[](unsigned y) const
-{ 
+{
     return reinterpret_cast<const T*>(imageData.data() + y * imageData.step());
-} 
+}
 
-/**   
+/**
 * Writes the image to the specified file. Supports the following file
 * types and extensions:
 *   - Windows bitmaps - BMP, DIB
@@ -262,10 +268,10 @@ inline const T* Image<T>::operator[](unsigned y) const
 *   - Sun rasters - SR, RAS
 *   - TIFF files - TIFF, TIF
 *
-* @param filename the filename of the file to create  
-*/ 
+* @param filename the filename of the file to create
+*/
 template <typename T>
-void Image<T>::save(std::string filename) 
+void Image<T>::save(std::string filename)
 {
     imageData.save(filename.c_str(), filename.c_str());
 }
